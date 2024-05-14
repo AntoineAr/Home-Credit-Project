@@ -82,11 +82,11 @@ clients_ids = get_clients_ids(df)
 threshold = 0.377 # Déterminé lors de la modélisation
 
 # shap :
-shap_values = explainer.shap_values(features)
+shap_values = explainer(features)
 
 # On ne retient que les explications pour la prédiction de la classe positive :
-exp = shap.Explanation(shap_values[1], 
-                       explainer.expected_value[1], 
+exp = shap.Explanation(shap_values[:, :, 1], 
+                       shap_values.base_values[:,1], 
                        data = features.values,
                        feature_names = features.columns)
 
