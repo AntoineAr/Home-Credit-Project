@@ -124,7 +124,7 @@ def prediction(customer_id):
 
 @app.get('/global_shap')
 def global_shap():
-    shap.summary_plot(shap_values[1], 
+    shap.summary_plot(shap_values, 
                       features = features.values,
                       feature_names = features.columns,
                       plot_type='violin',
@@ -142,27 +142,19 @@ def global_shap():
 @app.get('/local_shap/<int:customer_id>')
 def local_shap(customer_id):
     if customer_id in clients_ids:
-        if customer_id in features.index:
-            client_idx = features.index.get_loc(customer_id)
-            client_data = features.loc[customer_id].values.reshape(1, -1)
-            # Assurez-vous que explainer.expected_value est un scalaire
-            if isinstance(explainer.expected_value, list):
-                expected_value = explainer.expected_value[1]
-            else:
-                expected_value = explainer.expected_value
-            shap.force_plot(expected_value, 
-                            shap_values[1][client_idx], 
-                            client_data.round(2), 
-                            feature_names=features.columns, 
-                            matplotlib=True, 
-                            show=False)
-            plt.savefig('local_shap.png')
-            with open('local_shap.png', 'rb') as img:
-                img_binary_file_content = img.read()
-                encoded = base64.b64encode(img_binary_file_content)
-            return 'data:image/png;base64,' + encoded.decode('utf-8')
-        else:
-            return 'Customer_id is not valid.'
+        client_data = features.loc[customer_id].values.reshape(1, -1)
+        shap.force_plot(explainer.expected_value[1], 
+                        shap_values[1][customer_id],
+                        client_data.round(2), 
+                        feature_names=features.columns, 
+                        matplotlib=True, 
+                        show=False)
+        plt.savefig('local_shap.png')
+        with open('local_shap.png', 'rb') as img:
+            img_binary_file_content = img.read()
+            encoded = base64.b64encode(img_binary_file_content)
+        return 'data:image/png;base64,' + encoded.decode('utf-8')
+    
     else:
         return 'Customer_id is not valid.'
     
