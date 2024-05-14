@@ -143,7 +143,7 @@ def global_shap():
 def local_shap(customer_id):
     if customer_id in clients_ids:
         client_data = features.loc[customer_id].values.reshape(1, -1)
-        shap.force_plot(explainer.expected_value[1], 
+        shap.force_plot(explainer.expected_value, 
                         shap_values[1][customer_id],
                         client_data.round(2), 
                         feature_names=features.columns, 
