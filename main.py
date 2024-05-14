@@ -145,7 +145,7 @@ def local_shap(customer_id):
         client_data = features.loc[customer_id].values.reshape(1, -1)
         client_index = features.index.get_loc(customer_id)
         shap.force_plot(explainer.expected_value, 
-                        shap_values[1][client_index],
+                        shap_values[:,1][client_index],
                         client_data.round(2), 
                         feature_names=features.columns, 
                         matplotlib=True, 
