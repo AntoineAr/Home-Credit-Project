@@ -148,7 +148,7 @@ def local_shap(customer_id):
                                explainer.expected_value, 
                                client_data, 
                                feature_names=features.columns)
-        shap.plots.waterfall(exp[client_index], show=False)
+        shap.plots.waterfall(exp[0], show=False)
         plt.savefig('local_shap.png')
         with open('local_shap.png', 'rb') as img:
             img_binary_file_content = img.read()
