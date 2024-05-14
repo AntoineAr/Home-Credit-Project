@@ -4,8 +4,10 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import re
+import shap
+import base64
 
 ### Préparation des données :
 
@@ -23,12 +25,14 @@ def load_data(data_path):
     return data
 
 # Fonction qui charge le scaler et le modèle :
-def load_scaler_and_model():
+def load_scaler_model_explainer():
     with open("calibrated_lgbm_v2.pkl", 'rb') as f_in:
         model = pickle.load(f_in)
     with open("scaler_v2.pkl", 'rb') as f_in:
         scaler = pickle.load(f_in)
-    return scaler, model
+    with open("shap_explainer_v2.pkl", 'rb') as f_in:
+        explainer = pickle.load(f_in)
+    return scaler, model, explainer
 
 # Fonction qui scale les données :
 def prepare_data(data, scaler):
@@ -72,10 +76,19 @@ def get_client_infos(client_id, path):
     return dict_infos
 
 df = load_data("subset_test.csv")
-scaler, model = load_scaler_and_model()
+scaler, model, explainer = load_scaler_model_explainer()
 features = prepare_data(df, scaler)
 clients_ids = get_clients_ids(df)
 threshold = 0.377 # Déterminé lors de la modélisation
+
+# shap :
+shap_values = explainer.shap_values(features)
+
+# On ne retient que les explications pour la prédiction de la classe positive :
+exp = shap.Explanation(shap_values[1], 
+                       explainer.expected_value[1], 
+                       data = features.values,
+                       feature_names = features.columns)
 
 ### Prédiction :
 
@@ -108,9 +121,47 @@ def prediction(customer_id):
         return jsonify(customer_info)
     else:
         return 'Customer_id is not valid.'
+
+@app.get('/global_shap')
+def global_shap():
+    shap.summary_plot(shap_values[1], 
+                      features = features.values,
+                      feature_names = features.columns,
+                      plot_type='violin',
+                      max_display=15,
+                      show=False)
+    plt.savefig('global_shap.png')
+    # read the image file and encode it adding the adapted prefix
+    with open('global_shap.png', 'rb') as img:
+        img_binary_file_content = img.read()
+        encoded = base64.b64encode(img_binary_file_content)
+        return (b'data:image/png;base64,' + encoded)
     
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=9696)
 
 
-
+@app.get('/local_shap/<int:customer_id>')
+def local_shap(customer_id):
+    if customer_id in clients_ids:
+        # Assurez-vous que customer_id est un index valide dans features
+        if customer_id in features.index:
+            client_idx = features.index.get_loc(customer_id)
+            client_data = features.loc[customer_id].values.reshape(1, -1)
+            shap.force_plot(explainer.expected_value[1], 
+                            shap_values[1][client_idx], 
+                            client_data.round(2), 
+                            feature_names=features.columns, 
+                            matplotlib=True, 
+                            show=False)
+            plt.savefig('local_shap.png')
+            # Lire le fichier image et encoder en base64
+            with open('local_shap.png', 'rb') as img:
+                img_binary_file_content = img.read()
+                encoded = base64.b64encode(img_binary_file_content)
+            # Retourner l'image encodée en base64
+            return (b'data:image/png;base64,' + encoded)
+        else:
+            return 'Customer_id is not valid.'
+    else:
+        return 'Customer_id is not valid.'
