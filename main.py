@@ -82,13 +82,13 @@ clients_ids = get_clients_ids(df)
 threshold = 0.377 # Déterminé lors de la modélisation
 
 # shap :
-shap_values = explainer(features)
+shap_values = explainer.shap_values(features)
 
 # On ne retient que les explications pour la prédiction de la classe positive :
-exp = shap.Explanation(shap_values[:, :, 1], 
+"""exp = shap.Explanation(shap_values[:, :, 1], 
                        shap_values.base_values[:,1], 
                        data = features.values,
-                       feature_names = features.columns)
+                       feature_names = features.columns)"""
 
 ### Prédiction :
 
@@ -149,7 +149,7 @@ def local_shap(customer_id):
             client_idx = features.index.get_loc(customer_id)
             client_data = features.loc[customer_id].values.reshape(1, -1)
             shap.force_plot(explainer.expected_value[1], 
-                            shap_values[1][client_idx], 
+                            shap_values[1][client_idx, :], 
                             client_data.round(2), 
                             feature_names=features.columns, 
                             matplotlib=True, 
