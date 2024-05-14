@@ -124,7 +124,7 @@ def prediction(customer_id):
 
 @app.get('/global_shap')
 def global_shap():
-    shap.summary_plot(shap_values[1], 
+    shap.summary_plot(shap_values, 
                       features = features.values,
                       feature_names = features.columns,
                       plot_type='violin',
@@ -135,10 +135,8 @@ def global_shap():
     with open('global_shap.png', 'rb') as img:
         img_binary_file_content = img.read()
         encoded = base64.b64encode(img_binary_file_content)
-        return (b'data:image/png;base64,' + encoded)
-    
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=9696)
+    # return the image encoded in base64
+    return (b'data:image/png;base64,' + encoded)
 
 
 @app.get('/local_shap/<int:customer_id>')
@@ -165,3 +163,6 @@ def local_shap(customer_id):
             return 'Customer_id is not valid.'
     else:
         return 'Customer_id is not valid.'
+    
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=9696)
