@@ -124,7 +124,7 @@ def prediction(customer_id):
 
 @app.get('/global_shap')
 def global_shap():
-    shap.summary_plot(shap_values, 
+    shap.summary_plot(shap_values[1], 
                       features = features.values,
                       feature_names = features.columns,
                       plot_type='violin',
