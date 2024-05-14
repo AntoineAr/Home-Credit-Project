@@ -41,6 +41,36 @@ def get_clients_ids(features):
     clients_ids = features.index.to_list()
     return clients_ids
 
+# Fonction qui crée le dataframe des données brutes :
+def load_brut_data(path):
+    df_brut = pd.read_csv(path)
+    return df_brut
+
+# Fonction qui renvoie les informations d'un client :
+def get_client_infos(client_id, path):
+    df_brut = load_brut_data(path)
+    client = df_brut[df_brut['SK_ID_CURR'] == client_id].drop(['SK_ID_CURR'], axis=1)
+    gender = client['CODE_GENDER'].values[0]
+    age = client['DAYS_BIRTH'].values[0]
+    age = int(np.abs(age) // 365)
+    revenu = float(client['AMT_INCOME_TOTAL'].values[0])
+    source_revenu = client['NAME_INCOME_TYPE'].values[0]
+    montant_credit = float(client['AMT_CREDIT'].values[0])
+    statut_famille = client['NAME_FAMILY_STATUS'].values[0]
+    education = client['NAME_EDUCATION_TYPE'].values[0]
+    ratio_revenu_credit = round((revenu / montant_credit) * 100, 2)
+    dict_infos = {
+        'sexe' : gender,
+        'âge' : age,
+        'revenu' : revenu,
+        'source_revenu' : source_revenu,
+        'montant_credit' : montant_credit,
+        'ratio_revenu_credit' : ratio_revenu_credit,
+        'statut_famille' : statut_famille,
+        'education' : education
+    }
+    return dict_infos
+
 df = load_data("subset_test.csv")
 scaler, model = load_scaler_and_model()
 features = prepare_data(df, scaler)
@@ -65,11 +95,16 @@ def prediction(customer_id):
     if customer_id in clients_ids:
         client_data = features.loc[customer_id].values.reshape(1, -1)
         proba = model.predict_proba(client_data)[0, 1]
+
+        client_infos = get_client_infos(customer_id, "subset_test_brut.csv")
+
         customer_info = {
             'id': customer_id,
             'proba_risk_class': proba.round(2),
-            'class': 'no_risk' if proba <= threshold else 'risk' 
+            'class': 'no_risk' if proba <= threshold else 'risk',
+            'client_infos' : client_infos
         }
+
         return jsonify(customer_info)
     else:
         return 'Customer_id is not valid.'
