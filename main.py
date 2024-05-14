@@ -144,12 +144,11 @@ def local_shap(customer_id):
     if customer_id in clients_ids:
         client_data = features.loc[customer_id].values.reshape(1, -1)
         client_index = features.index.get_loc(customer_id)
-        shap.force_plot(explainer.expected_value, 
-                        shap_values[:,1][client_index],
-                        client_data.round(2), 
-                        feature_names=features.columns, 
-                        matplotlib=True, 
-                        show=False)
+        exp = shap.Explanation(shap_values[1], 
+                               explainer.expected_value[1], 
+                               client_data, 
+                               feature_names=features.columns)
+        shap.plots.waterfall(exp[client_index], show=False)
         plt.savefig('local_shap.png')
         with open('local_shap.png', 'rb') as img:
             img_binary_file_content = img.read()
