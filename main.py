@@ -151,7 +151,7 @@ def local_shap(customer_id):
             else:
                 expected_value = explainer.expected_value
             shap.force_plot(expected_value, 
-                            shap_values[1][client_idx, :], 
+                            shap_values[1][client_idx], 
                             client_data.round(2), 
                             feature_names=features.columns, 
                             matplotlib=True, 
