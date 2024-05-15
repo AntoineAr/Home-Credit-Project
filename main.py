@@ -4,8 +4,8 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
-import io
-from flask import Flask, request, jsonify, Response
+from io import BytesIO
+from flask import Flask, request, jsonify
 import re
 import shap
 import base64
@@ -131,11 +131,17 @@ def global_shap():
                       features=features.values, 
                       feature_names=features.columns, 
                       show=False)
-    plt.savefig('global_shap.png')
-    with open('global_shap.png', 'rb') as img:
-        img_binary_file_content = img.read()
-        encoded = base64.b64encode(img_binary_file_content)
-    return 'data:image/png;base64,' + encoded.decode('utf-8')
+    
+    # Création d'un objet BytesIO pour stocker l'image
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    
+    # Conversion de l'image en base64
+    encoded_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    
+    # Affichage de l'image directement dans le navigateur
+    return f'<img src="data:image/png;base64,{encoded_string}">'
 
 # Fonction qui affiche la feature importance locale pour le client sélectionné :
 @app.get('/local_shap/<int:client_id>')
