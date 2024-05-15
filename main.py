@@ -75,7 +75,7 @@ def get_client_infos(client_id, path):
     }
     return dict_infos
 
-df = load_data("subset_test.csv")
+df = load_data("data\subset_train.csv")
 scaler, model, explainer = load_scaler_model_explainer()
 features = prepare_data(df, scaler)
 clients_ids = get_clients_ids(df)
@@ -94,67 +94,58 @@ shap_values = explainer.shap_values(features)
 
 # Instantiate the flask object
 app = Flask(__name__)
+app.config['JSON_SORT_KEYS'] = False
 
 @app.route("/")
 def welcome():
-    return ("Welcome! Github Actions ok (: :) ?")
+    return ("Bienvenue sur l'API de prédiction de défaut")
 
 @app.route('/prediction/')
 def print_id_list():
     return f'The list of valid client ids :\n\n{(clients_ids)}'
 
-@app.route('/prediction/<int:customer_id>')
-def prediction(customer_id):
-    if customer_id in clients_ids:
-        client_data = features.loc[customer_id].values.reshape(1, -1)
+@app.route('/prediction/<int:client_id>')
+def prediction(client_id):
+    if client_id in clients_ids:
+        client_data = features.loc[client_id].values.reshape(1, -1)
         proba = model.predict_proba(client_data)[0, 1]
 
-        client_infos = get_client_infos(customer_id, "subset_test_brut.csv")
+        client_infos = get_client_infos(client_id, "data\subset_train_brut.csv")
 
-        customer_info = {
-            'id': customer_id,
+        customer_pred = {
+            'id': client_id,
             'proba_risk_class': proba.round(2),
             'class': 'no_risk' if proba <= threshold else 'risk',
             'client_infos' : client_infos
         }
 
-        return jsonify(customer_info)
+        return jsonify(customer_pred)
     else:
-        return 'Customer_id is not valid.'
+        return 'Client_id is not valid.'
 
+# Fonction qui affiche la feature importance globale via un summary plot shap :
 @app.get('/global_shap')
 def global_shap():
-    shap.summary_plot(shap_values, 
+    shap.summary_plot(shap_values[1], 
                       features = features.values,
                       feature_names = features.columns,
                       plot_type='violin',
                       max_display=15,
-                      show=False)
+                      show=True)
     plt.savefig('global_shap.png')
-    # read the image file and encode it adding the adapted prefix
-    with open('global_shap.png', 'rb') as img:
-        img_binary_file_content = img.read()
-        encoded = base64.b64encode(img_binary_file_content)
-    # return the image encoded in base64
-    return (b'data:image/png;base64,' + encoded)
 
-
-@app.get('/local_shap/<int:customer_id>')
-def local_shap(customer_id):
-    if customer_id in clients_ids:
-        client_data = features.loc[customer_id].values.reshape(1, -1)
-        client_index = features.index.get_loc(customer_id)
+# Fonction qui affiche la feature importance locale pour le client sélectionné :
+@app.get('/local_shap/<int:client_id>')
+def local_shap(client_id):
+    if client_id in clients_ids:
+        client_data = features.loc[client_id].values.reshape(1, -1)
+        client_index = features.index.get_loc(client_id)
         exp = shap.Explanation(shap_values[1], 
                                explainer.expected_value[1], 
                                client_data, 
                                feature_names=features.columns)
-        shap.plots.waterfall(exp[0], show=False)
+        shap.plots.waterfall(exp[0])
         plt.savefig('local_shap.png')
-        with open('local_shap.png', 'rb') as img:
-            img_binary_file_content = img.read()
-            encoded = base64.b64encode(img_binary_file_content)
-        return 'data:image/png;base64,' + encoded.decode('utf-8')
-    
     else:
         return 'Customer_id is not valid.'
     
