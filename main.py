@@ -127,7 +127,7 @@ def prediction(client_id):
 @app.get('/global_shap')
 def global_shap():
     # Assurez-vous que shap_values et features sont définis correctement
-    shap.summary_plot(shap_values[1], 
+    shap.summary_plot(shap_values, 
                       features=features.values,
                       feature_names=features.columns,
                       plot_type='violin',
