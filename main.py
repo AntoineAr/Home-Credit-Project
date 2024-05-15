@@ -132,12 +132,14 @@ def global_shap():
                       feature_names=features.columns,
                       plot_type='violin',
                       max_display=15,
-                      show=True)  # afficher directement dans la fonction
+                      show=False)  # Ne pas afficher directement dans la fonction
 
-    # Save the image locally
+    # Sauvegarder l'image localement
     img_path = 'global_shap.png'
     plt.savefig(img_path)
-    # read the image file and encode it adding the adapted prefix
+    plt.close()  # Fermer la figure pour libérer la mémoire
+
+    # Lire le fichier image et l'encoder en ajoutant le préfixe adapté
     with open(img_path, 'rb') as img:
         img_binary_file_content = img.read()
         encoded = base64.b64encode(img_binary_file_content)
