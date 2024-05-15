@@ -132,12 +132,16 @@ def global_shap():
                       feature_names=features.columns,
                       plot_type='violin',
                       max_display=15,
-                      show=True)  # afficher directement dans la fonction
+                      show=False)  # afficher directement dans la fonction
 
-    # plt.show()
-    # plt.close()  # Fermer la figure après l'avoir sauvegardée
-
-    return 'Global SHAP plot displayed'
+    # Save the image locally
+    img_path = 'global_shap.png'
+    plt.savefig(img_path)
+    # read the image file and encode it adding the adapted prefix
+    with open(img_path, 'rb') as img:
+        img_binary_file_content = img.read()
+        encoded = base64.b64encode(img_binary_file_content)
+        return (b'data:image/png;base64,' + encoded)
 
 # Fonction qui affiche la feature importance locale pour le client sélectionné :
 @app.get('/local_shap/<int:client_id>')
