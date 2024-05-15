@@ -125,7 +125,7 @@ def prediction(client_id):
         return 'Client_id is not valid.'
 
 # Fonction qui affiche la feature importance globale via un summary plot shap :
-@app.get('/global_shap')
+@app.route('/global_shap')
 def global_shap():
     shap.summary_plot(shap_values, 
                       features=features.values, 
