@@ -10,7 +10,7 @@ import shap
 
 # Fonction qui teste si les données ne sont pas vides :
 def not_empty_returns():
-    data = load_data("subset_test.csv")
+    data = load_data("./data/subset_train.csv")
     scaler, model, explainer = load_scaler_model_explainer()
     features = prepare_data(data, scaler)
     clients_ids = get_clients_ids(data)
@@ -23,7 +23,7 @@ def not_empty_returns():
 
 # Fonction qui test que l'index de data est bien l'identifiant client :
 def test_index_is_client_id():
-    data = load_data("subset_test.csv")
+    data = load_data("./data/subset_train.csv")
     assert data.index.name == 'SK_ID_CURR'
 
 # Fonction qui teste quelques ID clients pour vérifier qu'ils sont bien valides :
