@@ -132,7 +132,7 @@ def global_shap():
                       feature_names=features.columns,
                       plot_type='violin',
                       max_display=15,
-                      show=False)  # afficher directement dans la fonction
+                      show=True)  # afficher directement dans la fonction
 
     # Save the image locally
     img_path = 'global_shap.png'
