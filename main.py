@@ -164,6 +164,12 @@ def local_shap(client_id):
 
         # Ajustez la taille de la figure matplotlib
         plt.gcf().set_size_inches(10, 6)  # Ajustez la taille en fonction de vos besoins
+        
+        # Ajustez les marges de la figure
+        plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)  # Ajustez les marges en fonction de vos besoins
+        
+        # Appliquer tight_layout
+        plt.tight_layout()
 
         # Création d'un objet BytesIO pour stocker l'image
         buffer = BytesIO()
