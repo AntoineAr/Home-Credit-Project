@@ -132,7 +132,6 @@ def global_shap():
                       feature_names=features.columns,
                       plot_type='violin',
                       max_display=15,
-                      matplotlib=True,
                       show=False)  # Ne pas afficher directement dans la fonction
 
     plt.savefig('global_shap.png')
