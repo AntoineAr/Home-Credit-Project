@@ -1,4 +1,4 @@
-from main import load_data, load_scaler_and_model, prepare_data, get_clients_ids
+from main import load_data, load_scaler_model_explainer, prepare_data, get_clients_ids
 import pandas as pd
 import pickle
 import pytest
@@ -6,16 +6,17 @@ import sklearn.preprocessing
 import lightgbm
 import sklearn.calibration
 import requests
-
+import shap
 
 # Fonction qui teste si les données ne sont pas vides :
 def not_empty_returns():
     data = load_data("subset_test.csv")
-    scaler, model = load_scaler_and_model()
+    scaler, model, explainer = load_scaler_model_explainer()
     features = prepare_data(data, scaler)
     clients_ids = get_clients_ids(data)
     assert type(scaler) == sklearn.preprocessing.StandardScaler
     assert type(model) == lightgbm.sklearn.LGBMClassifier
+    assert type(explainer) == shap.TreeExplainer
     assert data.shape != (0, 0)
     assert features.shape != (0, 0)
     assert len(clients_ids) != 0
