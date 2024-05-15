@@ -29,7 +29,10 @@ def test_index_is_client_id():
 # Fonction qui teste quelques ID clients pour vérifier qu'ils sont bien valides :
 client_id_test = [146124, 242167, 343897]
 def test_ids_client():
-    clients_ids = get_clients_ids()
+    df = load_data("./data/subset_train.csv")
+    scaler, model, explainer = load_scaler_model_explainer()
+    features = prepare_data(df, scaler)
+    clients_ids = get_clients_ids(features)
     for client_id in client_id_test:
         assert client_id in clients_ids
 
