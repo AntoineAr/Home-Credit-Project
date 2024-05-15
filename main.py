@@ -180,11 +180,11 @@ def local_shap(client_id):
         encoded_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
         
         # Affichage de l'image directement dans le navigateur
-        image_html = f'<img src="data:image/png;base64,{encoded_string}" style="margin-left: auto; margin-right: auto; display: block;">'
+        # image_html = f'<img src="data:image/png;base64,{encoded_string}" style="margin-left: auto; margin-right: auto; display: block;">'
         
         # Affichage de l'image directement dans le navigateur
-        return image_html
-        # return f'<img src="data:image/png;base64,{encoded_string}">'
+        # return image_html
+        return f'<img src="data:image/png;base64,{encoded_string}">'
     else:
         return 'Customer_id is not valid.'
     
