@@ -133,7 +133,7 @@ def global_shap():
                       plot_type='violin',
                       max_display=15,
                       show=False)  # Ne pas afficher directement dans la fonction
-
+    plt.show()
     # Sauvegarder l'image localement
     img_path = 'global_shap.png'
     plt.savefig(img_path)
