@@ -132,12 +132,12 @@ def global_shap():
                       feature_names=features.columns,
                       plot_type='violin',
                       max_display=15,
-                      show=False)  # Ne pas afficher directement dans la fonction
+                      show=True)  # Ne pas afficher directement dans la fonction
 
-    plt.savefig('global_shap.png')
-    plt.close()  # Fermer la figure après l'avoir sauvegardée
+    plt.show()
+    # plt.close()  # Fermer la figure après l'avoir sauvegardée
 
-    return 'Global SHAP plot saved as global_shap.png'
+    return 'Global SHAP plot displayed'
 
 # Fonction qui affiche la feature importance locale pour le client sélectionné :
 @app.get('/local_shap/<int:client_id>')
