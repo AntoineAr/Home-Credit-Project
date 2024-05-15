@@ -37,8 +37,8 @@ def test_prediction_client_risk():
     # URL de l'app :
     url = 'https://application-credit-7ba79bc598e5.herokuapp.com/prediction/'
     # ID client connu pour être à risque
-    client_id_risk = '343897'
-    url_client = url+client_id_risk
+    client_id_risk = 343897
+    url_client = url + str(client_id_risk)
     # Envoi d'une requête GET avec l'ID client
     response = requests.get(url_client)
     # Vérifier que la requête a réussi (code de statut HTTP 200)
@@ -52,8 +52,8 @@ def test_prediction_client_no_risk():
     # URL de l'app :
     url = 'https://application-credit-7ba79bc598e5.herokuapp.com/prediction/'
     # ID client connu pour ne pas être à risque
-    client_id_no_risk = '374271'
-    url_client = url+client_id_no_risk
+    client_id_no_risk = 374271
+    url_client = url + str(client_id_no_risk)
     # Envoi d'une requête GET avec l'ID client
     response = requests.get(url_client)
     # Vérifier que la requête a réussi (code de statut HTTP 200)
