@@ -149,12 +149,12 @@ def local_shap(client_id):
     if client_id in clients_ids:
         client_data = features.loc[client_id].values.reshape(1, -1)
         client_index = features.index.get_loc(client_id)
-        exp = shap.Explanation(shap_values[1], 
-                               explainer.expected_value[0], 
+        exp = shap.Explanation(shap_values[client_index], 
+                               explainer.expected_value, 
                                client_data, 
                                feature_names=features.columns)
-        shap.plots.waterfall(exp[0])
-        # plt.show()
+        shap.plots.waterfall(exp)
+        plt.show()
         return 'Waterfall plot displayed for client {}'.format(client_id)
     else:
         return 'Customer_id is not valid.'
