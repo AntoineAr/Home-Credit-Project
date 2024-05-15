@@ -127,24 +127,15 @@ def prediction(client_id):
 # Fonction qui affiche la feature importance globale via un summary plot shap :
 @app.get('/global_shap')
 def global_shap():
-    # Assurez-vous que shap_values et features sont définis correctement
     shap.summary_plot(shap_values, 
-                      features=features.values,
-                      feature_names=features.columns,
-                      plot_type='violin',
-                      max_display=15,
-                      show=False)  # Ne pas afficher directement dans la fonction
-
-    img_buffer = io.BytesIO()  # Créer un tampon mémoire pour l'image
-    plt.savefig(img_buffer, format='png')  # Enregistrer l'image dans le tampon
-    plt.close()  # Fermer la figure pour libérer la mémoire
-
-    img_buffer.seek(0)  # Rembobiner le tampon au début
-    img_binary_file_content = img_buffer.getvalue()  # Lire le contenu binaire de l'image
-
-    # Encodage de l'image en base64 et ajout du préfixe
-    encoded = base64.b64encode(img_binary_file_content)
-    return Response(encoded, mimetype='image/png')
+                      features=features.values, 
+                      feature_names=features.columns, 
+                      show=False)
+    plt.savefig('global_shap.png')
+    with open('global_shap.png', 'rb') as img:
+        img_binary_file_content = img.read()
+        encoded = base64.b64encode(img_binary_file_content)
+    return 'data:image/png;base64,' + encoded.decode('utf-8')
 
 # Fonction qui affiche la feature importance locale pour le client sélectionné :
 @app.get('/local_shap/<int:client_id>')
