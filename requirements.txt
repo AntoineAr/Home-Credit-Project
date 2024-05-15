@@ -8,3 +8,5 @@ gunicorn
 lightgbm
 shap
 numba==0.57.1
+pytest
+requests
