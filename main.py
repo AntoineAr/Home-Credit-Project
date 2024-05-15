@@ -157,6 +157,7 @@ def local_shap(client_id):
                                explainer.expected_value, 
                                features.iloc[client_index,:], 
                                feature_names=features.columns)
+        plt.tight_layout()
         
         # Créez le waterfall plot
         shap.plots.waterfall(exp)
