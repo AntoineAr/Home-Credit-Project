@@ -160,7 +160,11 @@ def local_shap(client_id):
         plt.tight_layout()
         
         # Créez le waterfall plot
-        shap.plots.waterfall(exp)
+        shap.plots.waterfall(exp, max_display=15)
+
+        # Ajustez la taille de la figure matplotlib
+        plt.gcf().set_size_inches(10, 6)  # Ajustez la taille en fonction de vos besoins
+
         # Création d'un objet BytesIO pour stocker l'image
         buffer = BytesIO()
         plt.savefig(buffer, format='png')
