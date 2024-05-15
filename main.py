@@ -146,16 +146,23 @@ def global_shap():
 # Fonction qui affiche la feature importance locale pour le client sélectionné :
 @app.get('/local_shap/<int:client_id>')
 def local_shap(client_id):
-    if client_id in clients_ids:
-        client_data = features.loc[client_id].values.reshape(1, -1)
-        client_index = features.index.get_loc(client_id)
-        exp = shap.Explanation(shap_values[client_index], 
+    if client_id in clients_ids:  # Assurez-vous que client_id est valide
+        client_index = features.index.get_loc(client_id)  # Obtenez l'index du client dans le DataFrame features
+        
+        # Obtenez les valeurs SHAP spécifiques au client
+        client_shap_values = shap_values[client_index]
+        
+        # Créez une explication SHAP pour le client
+        exp = shap.Explanation(client_shap_values, 
                                explainer.expected_value, 
-                               client_data, 
+                               features.iloc[client_index,:], 
                                feature_names=features.columns)
+        
+        # Créez le waterfall plot
         shap.plots.waterfall(exp)
-        plt.show()
-        return 'Waterfall plot displayed for client {}'.format(client_id)
+        plt.show()  # Affichez le plot
+        
+        return f'Waterfall plot displayed for client {client_id}'
     else:
         return 'Customer_id is not valid.'
     
