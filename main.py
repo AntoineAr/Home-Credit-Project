@@ -132,9 +132,9 @@ def global_shap():
                       feature_names=features.columns,
                       plot_type='violin',
                       max_display=15,
-                      show=True)  # Ne pas afficher directement dans la fonction
+                      show=True)  # afficher directement dans la fonction
 
-    plt.show()
+    # plt.show()
     # plt.close()  # Fermer la figure après l'avoir sauvegardée
 
     return 'Global SHAP plot displayed'
@@ -150,7 +150,8 @@ def local_shap(client_id):
                                client_data, 
                                feature_names=features.columns)
         shap.plots.waterfall(exp[0])
-        plt.savefig('local_shap.png')
+        # plt.show()
+        return 'Waterfall plot displayed for client {}'.format(client_id)
     else:
         return 'Customer_id is not valid.'
     
