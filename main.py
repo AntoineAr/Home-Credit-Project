@@ -150,7 +150,7 @@ def local_shap(client_id):
         client_data = features.loc[client_id].values.reshape(1, -1)
         client_index = features.index.get_loc(client_id)
         exp = shap.Explanation(shap_values[1], 
-                               explainer.expected_value[1], 
+                               explainer.expected_value[0], 
                                client_data, 
                                feature_names=features.columns)
         shap.plots.waterfall(exp[0])
