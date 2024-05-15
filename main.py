@@ -160,9 +160,16 @@ def local_shap(client_id):
         
         # Créez le waterfall plot
         shap.plots.waterfall(exp)
-        plt.show()  # Affichez le plot
+        # Création d'un objet BytesIO pour stocker l'image
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
         
-        return f'Waterfall plot displayed for client {client_id}'
+        # Conversion de l'image en base64
+        encoded_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        
+        # Affichage de l'image directement dans le navigateur
+        return f'<img src="data:image/png;base64,{encoded_string}">'
     else:
         return 'Customer_id is not valid.'
     
