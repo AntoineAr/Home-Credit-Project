@@ -103,7 +103,7 @@ def welcome():
 
 @app.route('/prediction/')
 def print_id_list():
-    return f'The list of valid client ids :\n\n{(clients_ids)}'
+    return f'Liste des id clients valides :\n\n{(clients_ids)}'
 
 @app.route('/prediction/<int:client_id>')
 def prediction(client_id):
@@ -115,14 +115,14 @@ def prediction(client_id):
 
         customer_pred = {
             'id': client_id,
-            'proba_risk_class': proba.round(2),
-            'class': 'no_risk' if proba <= threshold else 'risk',
+            'probabilité_défaut': proba.round(2),
+            'statut': 'non risqué' if proba <= threshold else 'à risque',
             'client_infos' : client_infos
         }
 
         return jsonify(customer_pred)
     else:
-        return 'Client_id is not valid.'
+        return 'Client_id non valide.'
 
 # Fonction qui affiche la feature importance globale via un summary plot shap :
 @app.route('/global_shap')
@@ -186,7 +186,7 @@ def local_shap(client_id):
         # return image_html
         return f'<img src="data:image/png;base64,{encoded_string}">'
     else:
-        return 'Customer_id is not valid.'
+        return 'ID Client non valide.'
     
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=9696)

@@ -5,8 +5,8 @@ import pytest
 import sklearn.preprocessing
 import lightgbm
 import sklearn.calibration
+import requests
 
-# I want to create a test file that will be used with pytest to test the functions in the main.py file:
 
 # Fonction qui teste si les données ne sont pas vides :
 def not_empty_returns():
@@ -24,4 +24,42 @@ def not_empty_returns():
 def test_index_is_client_id():
     data = load_data("subset_test.csv")
     assert data.index.name == 'SK_ID_CURR'
+
+# Fonction qui teste quelques ID clients pour vérifier qu'ils sont bien valides :
+client_id_test = [146124, 242167, 343897]
+def test_ids_client():
+    clients_ids = get_clients_ids()
+    for client_id in client_id_test:
+        assert client_id in clients_ids
+
+def test_prediction_client_risk():
+    # URL de l'app :
+    url = 'https://application-credit-7ba79bc598e5.herokuapp.com/prediction/'
+    # ID client connu pour être à risque
+    client_id_risk = '343897'
+    url_client = url+client_id_risk
+    # Envoi d'une requête GET avec l'ID client
+    response = requests.get(url_client)
+    # Vérifier que la requête a réussi (code de statut HTTP 200)
+    assert response.status_code == 200
+    # Analyser la réponse JSON
+    response_json = response.json()
+    # Vérifier que la réponse indique que le client est à risque
+    assert response_json['statut'] == 'à risque'
+
+def test_prediction_client_no_risk():
+    # URL de l'app :
+    url = 'https://application-credit-7ba79bc598e5.herokuapp.com/prediction/'
+    # ID client connu pour ne pas être à risque
+    client_id_no_risk = '374271'
+    url_client = url+client_id_no_risk
+    # Envoi d'une requête GET avec l'ID client
+    response = requests.get(url_client)
+    # Vérifier que la requête a réussi (code de statut HTTP 200)
+    assert response.status_code == 200
+    # Analyser la réponse JSON
+    response_json = response.json()
+    # Vérifier que la réponse indique que le client n'est pas à risque
+    assert response_json['statut'] == 'non risqué'
+
 
