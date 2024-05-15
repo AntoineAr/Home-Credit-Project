@@ -75,7 +75,7 @@ def get_client_infos(client_id, path):
     }
     return dict_infos
 
-df = load_data("data\subset_train.csv")
+df = load_data("./data/subset_train.csv")
 scaler, model, explainer = load_scaler_model_explainer()
 features = prepare_data(df, scaler)
 clients_ids = get_clients_ids(df)
@@ -110,7 +110,7 @@ def prediction(client_id):
         client_data = features.loc[client_id].values.reshape(1, -1)
         proba = model.predict_proba(client_data)[0, 1]
 
-        client_infos = get_client_infos(client_id, "data\subset_train_brut.csv")
+        client_infos = get_client_infos(client_id, "./data/subset_train_brut.csv")
 
         customer_pred = {
             'id': client_id,
