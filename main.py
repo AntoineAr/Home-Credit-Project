@@ -4,7 +4,8 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
-from flask import Flask, request, jsonify, send_file
+import io
+from flask import Flask, request, jsonify, Response
 import re
 import shap
 import base64
@@ -133,17 +134,17 @@ def global_shap():
                       plot_type='violin',
                       max_display=15,
                       show=False)  # Ne pas afficher directement dans la fonction
-    plt.show()
-    # Sauvegarder l'image localement
-    img_path = 'global_shap.png'
-    plt.savefig(img_path)
+
+    img_buffer = io.BytesIO()  # Créer un tampon mémoire pour l'image
+    plt.savefig(img_buffer, format='png')  # Enregistrer l'image dans le tampon
     plt.close()  # Fermer la figure pour libérer la mémoire
 
-    # Lire le fichier image et l'encoder en ajoutant le préfixe adapté
-    with open(img_path, 'rb') as img:
-        img_binary_file_content = img.read()
-        encoded = base64.b64encode(img_binary_file_content)
-        return (b'data:image/png;base64,' + encoded)
+    img_buffer.seek(0)  # Rembobiner le tampon au début
+    img_binary_file_content = img_buffer.getvalue()  # Lire le contenu binaire de l'image
+
+    # Encodage de l'image en base64 et ajout du préfixe
+    encoded = base64.b64encode(img_binary_file_content)
+    return Response(encoded, mimetype='image/png')
 
 # Fonction qui affiche la feature importance locale pour le client sélectionné :
 @app.get('/local_shap/<int:client_id>')
