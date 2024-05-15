@@ -94,7 +94,7 @@ shap_values = explainer.shap_values(features)
 
 # Instantiate the flask object
 app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
+app.config['JSON_SORT_KEYS'] = True
 
 @app.route("/")
 def welcome():
@@ -126,13 +126,19 @@ def prediction(client_id):
 # Fonction qui affiche la feature importance globale via un summary plot shap :
 @app.get('/global_shap')
 def global_shap():
+    # Assurez-vous que shap_values et features sont définis correctement
     shap.summary_plot(shap_values[1], 
-                      features = features.values,
-                      feature_names = features.columns,
+                      features=features.values,
+                      feature_names=features.columns,
                       plot_type='violin',
                       max_display=15,
-                      show=True)
+                      matplotlib=True,
+                      show=False)  # Ne pas afficher directement dans la fonction
+
     plt.savefig('global_shap.png')
+    plt.close()  # Fermer la figure après l'avoir sauvegardée
+
+    return 'Global SHAP plot saved as global_shap.png'
 
 # Fonction qui affiche la feature importance locale pour le client sélectionné :
 @app.get('/local_shap/<int:client_id>')
