@@ -1,3 +1,11 @@
+"""Création d'un script python permettant de déployer un modèle de machine learning via une API Flask. 
+L'API permet de prédire la probabilité de défaut de paiement d'un client, puis en fonction d'un seuil établi lors de la modélisation,
+de déterminer si le client est à risque ou non. 
+L'API fournit également des informations (âge, sexe, statut marital, etc.) sur le client et des graphiques de feature importance globale et locale. 
+L'API est déployée localement et peut être accédée via un navigateur web. 
+Le modèle de machine learning utilisé est un modèle LightGBM calibré."""
+
+
 # import des packages
 import numpy as np
 import pandas as pd
@@ -25,14 +33,20 @@ def load_data(data_path):
         data.drop('TARGET', axis = 1, inplace=True)
     return data
 
-# Fonction qui charge le scaler et le modèle :
+# Fonction qui charge le scaler, le modèle et l'explainer SHAP créés lors de la modélisation:
 def load_scaler_model_explainer():
-    with open("calibrated_lgbm_v2.pkl", 'rb') as f_in:
+    model_path = "data\calibrated_lgbm_v2.pkl"
+    with open(model_path, 'rb') as f_in:
         model = pickle.load(f_in)
-    with open("scaler_v2.pkl", 'rb') as f_in:
+
+    scaler_path = "data\scaler_v2.pkl"
+    with open(scaler_path, 'rb') as f_in:
         scaler = pickle.load(f_in)
-    with open("shap_explainer_v2.pkl", 'rb') as f_in:
+
+    explainer_path = "data\shap_explainer_v2.pkl"
+    with open(explainer_path, 'rb') as f_in:
         explainer = pickle.load(f_in)
+
     return scaler, model, explainer
 
 # Fonction qui scale les données :
@@ -46,7 +60,7 @@ def get_clients_ids(features):
     clients_ids = features.index.to_list()
     return clients_ids
 
-# Fonction qui crée le dataframe des données brutes :
+# Fonction qui crée le dataframe des données brutes (nécessaire pour obtenir les informations clients) :
 def load_brut_data(path):
     df_brut = pd.read_csv(path)
     return df_brut
@@ -76,35 +90,37 @@ def get_client_infos(client_id, path):
     }
     return dict_infos
 
+# Chargement des données, du scaler, du modèle, de la liste des IDs clients valides et de l'explainer SHAP :
+
 df = load_data("./data/subset_train.csv")
 scaler, model, explainer = load_scaler_model_explainer()
 features = prepare_data(df, scaler)
 clients_ids = get_clients_ids(df)
 threshold = 0.377 # Déterminé lors de la modélisation
-
 # shap :
 shap_values = explainer.shap_values(features)
 
-# On ne retient que les explications pour la prédiction de la classe positive :
-"""exp = shap.Explanation(shap_values[:, :, 1], 
-                       shap_values.base_values[:,1], 
-                       data = features.values,
-                       feature_names = features.columns)"""
-
 ### Prédiction :
 
-# Instantiate the flask object
+# On instancie l'API Flask :
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = True
+
+# On configure différentes routes pour l'API :
+
+# Route d'"acceuil" :
 
 @app.route("/")
 def welcome():
     return ("Bienvenue sur l'API de prédiction de défaut")
 
+# Route qui affiche la liste des IDs clients valides :
+
 @app.route('/prediction/')
 def print_id_list():
     return f'Liste des id clients valides :\n\n{(clients_ids)}'
 
+# Route qui affiche les informations d'un client et sa probabilité de défaut de paiement :
 @app.route('/prediction/<int:client_id>')
 def prediction(client_id):
     if client_id in clients_ids:
@@ -124,7 +140,7 @@ def prediction(client_id):
     else:
         return 'Client_id non valide.'
 
-# Fonction qui affiche la feature importance globale via un summary plot shap :
+# Route qui affiche la feature importance globale via un summary plot shap :
 @app.route('/global_shap')
 def global_shap():
     shap.summary_plot(shap_values, 
@@ -143,47 +159,38 @@ def global_shap():
     # Affichage de l'image directement dans le navigateur
     return f'<img src="data:image/png;base64,{encoded_string}">'
 
-# Fonction qui affiche la feature importance locale pour le client sélectionné :
+# Route qui affiche la feature importance locale pour le client sélectionné :
 @app.get('/local_shap/<int:client_id>')
 def local_shap(client_id):
-    if client_id in clients_ids:  # Assurez-vous que client_id est valide
-        client_index = features.index.get_loc(client_id)  # Obtenez l'index du client dans le DataFrame features
+    if client_id in clients_ids:  # On s'assure ici que client_id est valide
+        client_index = features.index.get_loc(client_id)  # On récupère l'index du client dans le DataFrame features
         
-        # Obtenez les valeurs SHAP spécifiques au client
+        # On récupère les valeurs SHAP spécifiques au client :
         client_shap_values = shap_values[client_index]
         
-        # Créez une explication SHAP pour le client
+        # On crée une explication SHAP pour le client :
         exp = shap.Explanation(client_shap_values, 
                                explainer.expected_value, 
                                features.iloc[client_index,:], 
                                feature_names=features.columns)
         plt.tight_layout()
         
-        # Créez le waterfall plot
+        # Création du waterfall plot
         shap.plots.waterfall(exp, max_display=15)
 
-        # Ajustez la taille de la figure matplotlib
-        plt.gcf().set_size_inches(10, 6)  # Ajustez la taille en fonction de vos besoins
-        
-        # Ajustez les marges de la figure
+        # Ajustement de la taille et des marges de la figure:
+        plt.gcf().set_size_inches(10, 6)
         plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)  # Ajustez les marges en fonction de vos besoins
-        
-        # Appliquer tight_layout
         plt.tight_layout()
 
         # Création d'un objet BytesIO pour stocker l'image
-        buffer = BytesIO()
-        plt.savefig(buffer, format='png')
-        buffer.seek(0)
+        buffer_1 = BytesIO()
+        plt.savefig(buffer_1, format='png')
+        buffer_1.seek(0)
         
-        # Conversion de l'image en base64
-        encoded_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        # Conversion de l'image en base64 :
+        encoded_string = base64.b64encode(buffer_1.getvalue()).decode('utf-8')
         
-        # Affichage de l'image directement dans le navigateur
-        # image_html = f'<img src="data:image/png;base64,{encoded_string}" style="margin-left: auto; margin-right: auto; display: block;">'
-        
-        # Affichage de l'image directement dans le navigateur
-        # return image_html
         return f'<img src="data:image/png;base64,{encoded_string}">'
     else:
         return 'ID Client non valide.'

@@ -1,3 +1,11 @@
+"""
+Il s'agit ici du fichier de test unitaire pour le projet. Il teste les fonctions du fichier main.py.
+L'idée est ensuite d'intégrer ces tests dans le workflow de déploiement continu via Github Actions.
+"""
+
+
+# Import des packages nécessaires :
+
 from main import load_data, load_scaler_model_explainer, prepare_data, get_clients_ids
 import pandas as pd
 import pickle
@@ -21,7 +29,7 @@ def not_empty_returns():
     assert features.shape != (0, 0)
     assert len(clients_ids) != 0
 
-# Fonction qui test que l'index de data est bien l'identifiant client :
+# Fonction qui test que l'index du dataframe renvoyé par la fonction load_data est bien l'identifiant client :
 def test_index_is_client_id():
     data = load_data("./data/subset_train.csv")
     assert data.index.name == 'SK_ID_CURR'
@@ -36,6 +44,7 @@ def test_ids_client():
     for client_id in client_id_test:
         assert client_id in clients_ids
 
+# Fonction qui teste le bon fonctionnement d'une prédiction pour un client à risque :
 def test_prediction_client_risk():
     # URL de l'app :
     url = 'https://application-credit-7ba79bc598e5.herokuapp.com/prediction/'
@@ -51,6 +60,7 @@ def test_prediction_client_risk():
     # Vérifier que la réponse indique que le client est à risque
     assert response_json['statut'] == 'à risque'
 
+# Fonction qui teste le bon fonctionnement d'une prédiction pour un client non risqué :
 def test_prediction_client_no_risk():
     # URL de l'app :
     url = 'https://application-credit-7ba79bc598e5.herokuapp.com/prediction/'
