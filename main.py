@@ -35,15 +35,15 @@ def load_data(data_path):
 
 # Fonction qui charge le scaler, le modèle et l'explainer SHAP créés lors de la modélisation:
 def load_scaler_model_explainer():
-    model_path = "data\calibrated_lgbm_v2.pkl"
+    model_path = "./data/calibrated_lgbm_v2.pkl"
     with open(model_path, 'rb') as f_in:
         model = pickle.load(f_in)
 
-    scaler_path = "data\scaler_v2.pkl"
+    scaler_path = "./data/scaler_v2.pkl"
     with open(scaler_path, 'rb') as f_in:
         scaler = pickle.load(f_in)
 
-    explainer_path = "data\shap_explainer_v2.pkl"
+    explainer_path = "./data/shap_explainer_v2.pkl"
     with open(explainer_path, 'rb') as f_in:
         explainer = pickle.load(f_in)
 
