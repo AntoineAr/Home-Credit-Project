@@ -152,6 +152,8 @@ def global_shap():
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
+
+    plt.close()
     
     # Conversion de l'image en base64
     encoded_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
@@ -169,12 +171,11 @@ def local_shap(client_id):
         client_shap_values = shap_values[client_index]
         
         # On crée une explication SHAP pour le client :
-        exp = shap.Explanation(client_shap_values, 
-                               explainer.expected_value, 
-                               features.iloc[client_index,:], 
+        exp = shap.Explanation(values = client_shap_values, 
+                               base_values = explainer.expected_value[1], 
+                               data = features.iloc[client_index,:], 
                                feature_names=features.columns)
-        plt.tight_layout()
-        
+        plt.figure()
         # Création du waterfall plot
         shap.plots.waterfall(exp, max_display=15)
 
@@ -187,6 +188,8 @@ def local_shap(client_id):
         buffer_1 = BytesIO()
         plt.savefig(buffer_1, format='png')
         buffer_1.seek(0)
+
+        plt.close()
         
         # Conversion de l'image en base64 :
         encoded_string = base64.b64encode(buffer_1.getvalue()).decode('utf-8')
