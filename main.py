@@ -108,15 +108,15 @@ app.config['JSON_SORT_KEYS'] = True
 
 # On configure différentes routes pour l'API :
 
-# Route d'"acceuil" :
+# Route d'"accueil" :
 
 @app.route("/")
 def welcome():
-    return ("Bienvenue sur l'API de prédiction de défaut")
+    return ("Bienvenue sur l'API de prédiction de défaut de paiement !\n\n")
 
 # Route qui affiche la liste des IDs clients valides :
 
-@app.route('/prediction/')
+@app.route('/list_ids')
 def print_id_list():
     return f'Liste des id clients valides :\n\n{(clients_ids)}'
 
