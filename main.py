@@ -172,7 +172,7 @@ def local_shap(client_id):
         
         # On crée une explication SHAP pour le client :
         exp = shap.Explanation(values = client_shap_values, 
-                               base_values = explainer.expected_value[1], 
+                               base_values = explainer.expected_value, 
                                data = features.iloc[client_index,:], 
                                feature_names=features.columns)
         plt.figure()
